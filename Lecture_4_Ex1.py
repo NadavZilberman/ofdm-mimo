@@ -1,49 +1,62 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import helpers as hlp
-
-def create_H(h0, h1, g0=None, g1=None):
-    # *** create H *** #
-    if g0 is None:
-        h0 = h0.reshape(-1, 1)
-        h1 = h1.reshape(-1, 1)
-        conj_h0 = np.conj(h0)
-        conj_h1 = np.conj(h1)
-        col1 = np.hstack((h0, conj_h1))
-        col2 = np.hstack((h1, -conj_h0))
-        H_mat = np.stack((col1, col2), axis=-1)
-    else:
-        h0 = h0.reshape(-1, 1)
-        h1 = h1.reshape(-1, 1)
-        conj_h0 = np.conj(h0)
-        conj_h1 = np.conj(h1)
-        g0 = g0.reshape(-1, 1)
-        g1 = g1.reshape(-1, 1)
-        conj_g0 = np.conj(g0)
-        conj_g1 = np.conj(g1)
-        col1 = np.hstack((h0, conj_h1, g0, conj_g1))
-        col2 = np.hstack((h1, -conj_h0, g1, -conj_g0))
-        H_mat = np.stack((col1, col2), axis=-1)
-    # *** calculate inverse of H *** #
-    # if g0 is None:
-    #     H_resahped = H_mat.reshape(-1, 2, 2)
-    #     H_inverse_reshaped = np.linalg.inv(H_resahped)
-    #     H_inverse = H_inverse_reshaped.reshape(repetitions,  2, 2)
-    # else:
-    #     H_inverse = None
-    return H_mat
+from Lecture_2_Ex2 import create_H
 
 def main():
     plt.figure()
     symbols_list = np.array([-1-1j, -1+1j, 1-1j, 1+1j])/2**0.5
     snr_array_dB = np.arange(0, 26)
     snr_array = 10**(snr_array_dB/10)
-    REP = 5000000
-    N = 1 # Rx ant
+    REP = 500000
+    ant_pairs = [[2,4], [2,2]] # [M, N]
+    SER_array_SM = [[], [], []] # Reminder: make sure there's the same number of sub arrays
     SER_array_STC = []
+    
+    # SM with ML
 
-    # STC 2x1
+    for i, [M, N] in enumerate(ant_pairs):
+        if M == 2:
+            combinations = np.array([[x, y] for x in symbols_list for y in symbols_list]).reshape(-1, M, 1)
+        elif M == 4:
+            combinations = np.array([[x, y, z, w] for x in symbols_list for y in symbols_list for z in symbols_list for w in symbols_list]).reshape(-1, M, 1)
+        combinations_repeated = np.tile(combinations, (REP, 1, 1, 1))
+        num_of_combinations = len(combinations)
+        for snr in snr_array:
+            rho = 1/np.sqrt(snr)
 
+            # generate symbols
+            random_s = np.random.choice(symbols_list, (REP, M, 1))
+
+            # generate channels and noise
+            H = (np.random.standard_normal((REP, N, M)) + 1j*np.random.standard_normal((REP, N, M)))/2**0.5
+            noise = (np.random.standard_normal((REP, N, 1)) + 1j*np.random.standard_normal((REP, N, 1)))/2**0.5
+
+            # calculate H_tild and repeat it
+            H_tild = H/M**0.5
+            H_tild_repeated = np.repeat(H_tild[:, np.newaxis], repeats=num_of_combinations, axis=1)
+
+            # calculate y and repeat it
+            y = np.matmul(H_tild, random_s) + rho * noise
+            y_repeated = np.repeat(y[:, np.newaxis], repeats=num_of_combinations, axis=1)
+
+            # calculate H_tild*s (mapped combinations at Rx)
+            mapped_combinations = np.matmul(H_tild_repeated, combinations_repeated)
+
+            # calculate ML term
+            ml_term = np.linalg.norm(y_repeated - mapped_combinations, axis=2)**2
+
+            # estimate symbols - minimize ML term
+            s_estimation_indices = np.argmin(ml_term, axis=1)
+            s_estimation = np.squeeze(combinations[s_estimation_indices])
+            
+            # calculate SER
+            curr_SER = hlp.calculate_SER(s_estimation[:,:,np.newaxis], random_s, REP*M)
+            SER_array_SM[i].append(curr_SER)
+        plt.plot(snr_array_dB, SER_array_SM[i], label=f"SM with ML {N}Rx X {M}Tx")
+
+    # STC 2x1 (copied and modified from Lecture_2_Ex2.py)
+    N = 1
     for snr in snr_array:
         rho = 1/np.sqrt(snr)
 
@@ -96,37 +109,14 @@ def main():
         SER_array_STC.append(SER_total)
     plt.plot(snr_array_dB, SER_array_STC, label=f"STC 2X{N}")
 
-
-    # MRC 1X2 (copied from Lecture_2_Ex1.py)
-    N = 2 
-    SER_array_MRC = []
-    random_symbols = np.random.choice(symbols_list, (REP, 1))
-
-    for snr in snr_array:
-        rho = 1/np.sqrt(snr)
-        h = (np.random.standard_normal((REP, N)) + 1j*np.random.standard_normal((REP, N)))/2**0.5
-        n = (np.random.standard_normal((REP, N)) + 1j*np.random.standard_normal((REP, N)))/2**0.5
-        y = h * random_symbols + rho * n
-        # calc s_hat
-        s_hat = np.sum(np.conj(h[:,:,np.newaxis]) * y[:,:,np.newaxis], axis=(1, 2))/np.linalg.norm(h, axis=1)**2
-        # # estimate symbols
-        s_estimation = hlp.estimate_closest_symbols(s_hat, symbols_list)
-        # calculate SER
-        curr_SER = hlp.calculate_SER(s_estimation, random_symbols.T, REP)
-        SER_array_MRC.append(curr_SER)
-
-    plt.plot(snr_array_dB, SER_array_MRC, label=f"MRC 1x2")
-
     plt.legend()
     plt.grid(which='both', axis='both')
     plt.xticks(snr_array_dB)
     plt.yscale('log')
-    plt.title(f'SER vs SNR - STC 2x1 vs MRC 1x2\n{REP} repetitions')
+    plt.title(f'SER vs SNR - SM with ML detection (2x2) vs STC (2x1)\n{REP} repetitions')
     plt.ylabel('SER')
     plt.xlabel('SNR[dB]')
     plt.show()
-    
-    # We see in the graph that MRC is better by 3dB.
 
 if __name__ == "__main__":
     main()
