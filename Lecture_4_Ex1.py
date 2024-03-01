@@ -9,8 +9,8 @@ def main():
     snr_array_dB = np.arange(0, 26)
     snr_array = 10**(snr_array_dB/10)
     REP = 500000
-    ant_pairs = [[2,2]] # [M, N]
-    SER_array_SM = [[]] # Reminder: make sure there's the same number of sub arrays
+    ant_pairs = [[2,4], [2,2]] # [M, N]
+    SER_array_SM = [[], [], []] # Reminder: make sure there's the same number of sub arrays
     SER_array_STC = []
     
     # SM with ML
@@ -117,7 +117,7 @@ def main():
     plt.ylabel('SER')
     plt.xlabel('SNR[dB]')
     plt.show()
-    pass
 
 if __name__ == "__main__":
     main()
+    breakpoint()

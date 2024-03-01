@@ -125,8 +125,9 @@ def main():
     plt.ylabel('SER')
     plt.xlabel('SNR[dB]')
     plt.show()
-    pass
+    
     # We see in the graph that MRC is better by 3dB.
 
 if __name__ == "__main__":
     main()
+    breakpoint()
