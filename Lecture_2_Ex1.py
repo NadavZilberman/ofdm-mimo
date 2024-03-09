@@ -15,7 +15,6 @@ def main():
         random_symbols = np.random.choice(symbols_list, (REP, 1))
 
         for snr in snr_array:
-            curr_ser = 0
             rho = 1/np.sqrt(snr)
             h = (np.random.standard_normal((REP, rx_array_len)) + 1j*np.random.standard_normal((REP, rx_array_len)))/2**0.5
             n = (np.random.standard_normal((REP, rx_array_len)) + 1j*np.random.standard_normal((REP, rx_array_len)))/2**0.5
@@ -34,7 +33,7 @@ def main():
     plt.legend()
     plt.xticks(snr_array_dB)
     plt.yscale('log')
-    plt.title(f'SER vs SNR - MRT with N=2,4 Antennas\n{REP} repetitions')
+    plt.title(f'SER vs SNR - MRC with N=2,4 Antennas\n{REP} repetitions')
     plt.ylabel('SER')
     plt.xlabel('SNR[dB]')
     plt.show()
