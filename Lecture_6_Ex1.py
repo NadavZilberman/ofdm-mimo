@@ -82,15 +82,12 @@ def main():
         # calculate H_tild
         HV = np.matmul(H, V)
         HV_tild = HV/M**0.5
-        H_tild = H/M**0.5
-
+    
         # calculate y and repeat it
         y = np.matmul(H, x) + rho * noise
 
         # calculate s_hat
-        # H_tild_conj = np.transpose(np.conj(HV), (0,2,1))
         H_tild_conj = np.transpose(np.conj(H), (0,2,1))
-        # s_hat = np.matmul(np.matmul(np.linalg.inv(np.matmul(H_tild_conj, HV)), H_tild_conj), y)
         s_hat = np.matmul(np.linalg.inv(V), np.matmul(np.matmul(np.linalg.inv(np.matmul(H_tild_conj, H)), H_tild_conj), y))
         
         s_hat = np.squeeze(s_hat, axis=2)
