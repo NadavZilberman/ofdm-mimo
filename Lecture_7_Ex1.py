@@ -1,11 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import helpers as hlp
 
 def main():
 
     # jaked calculation
-    V = 50
+    V = 120/3.6
     fc = 2.4e9
     f_max = fc*V/3e8
     fs = f_max*40
@@ -63,7 +62,7 @@ def main():
     plt.plot(np.abs(channel_signal),  label="t0 + long time")
 
     plt.legend()
-    plt.title("Magnitude of the channel: time t0 , t1 = t0 + short time, t2=t0 + long time\n(compared to coherence time)")
+    plt.title(f"Magnitude of the channel: time t0 , t1 = t0 + short time, t2=t0 + long time\n(compared to coherence time)\nV = {V:.2f}m/s, fc = {fc/1e9}GHz")
     plt.xlabel("Frequency")
     plt.ylabel("|H(f)|")
     plt.grid()
