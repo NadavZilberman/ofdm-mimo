@@ -5,8 +5,8 @@ import helpers as hlp
 def main():
 
     # jaked calculation
-    V = 30
-    fc = 2.5e9
+    V = 50
+    fc = 2.4e9
     f_max = fc*V/3e8
     fs = f_max*40
     FFT_size = 8192
