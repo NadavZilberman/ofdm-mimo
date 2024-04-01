@@ -168,7 +168,18 @@ def main():
     sta1_symbols_both_streams = np.concatenate((sta1_symbols_mat_0[np.newaxis], sta1_symbols_mat_1[np.newaxis]))
     evm = np.mean(np.abs(s_hat_sta1 - sta1_symbols_both_streams)**2)
     print(f"STA1: EVM = {evm}")
+    plt.figure()
+    plt.xlabel("real")
+    plt.ylabel("imag")
+    plt.title("Constellation plot for STA0 estimated symbols")
+    plt.scatter(np.real(s_hat_sta0.flatten()), np.imag(s_hat_sta0.flatten()))
 
-    # We can see that the EVM is practically zero.
+    plt.figure()
+    plt.xlabel("real")
+    plt.ylabel("imag")
+    plt.title("Constellation plot for STA1 estimated symbols")
+    plt.scatter(np.real(sta1_symbols_both_streams.flatten()), np.imag(sta1_symbols_both_streams.flatten()))
+    plt.show()
+    # We can see that the EVM is practically zero and all
 if __name__ == "__main__":
     main()

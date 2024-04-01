@@ -63,7 +63,7 @@ def main():
             payload_estimation = hp.estimate_closest_symbols(estimated_ifft_coeffs_flattened, symbols_list)
 
             # calculate evm
-            evm = np.mean(np.abs(payload_estimation - payload_flatten)**2)
+            evm = np.mean(np.abs(estimated_ifft_coeffs_flattened - payload_flatten)**2)
 
             # channel estimation - perfect
 
@@ -76,7 +76,7 @@ def main():
             payload_estimation = hp.estimate_closest_symbols(estimated_ifft_coeffs_flattened, symbols_list)
 
             # calculate evm
-            evm_perfect_ch_knowledge = np.mean(np.abs(payload_estimation - payload_flatten)**2)
+            evm_perfect_ch_knowledge = np.mean(np.abs(estimated_ifft_coeffs_flattened - payload_flatten)**2)
 
             if channel is channel_0:
                 evm_ch_0 += evm/REP
